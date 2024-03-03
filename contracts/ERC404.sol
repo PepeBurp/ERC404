@@ -63,6 +63,12 @@ abstract contract ERC404 is IERC404 {
   /// @dev EIP-2612 nonces
   mapping(address => uint256) public nonces;
 
+  // Mapping to store the last transfer time for each token
+  mapping(uint256 => uint256) private lastTransferTimestamp;
+
+  // Event for logging the update of the time of the last transfer
+  event TokenTransferWithTimestampUpdated(uint256 tokenId, uint256 timestamp);
+
   /// @dev Address bitmask for packed ownership data
   uint256 private constant _BITMASK_ADDRESS = (1 << 160) - 1;
 
@@ -70,7 +76,7 @@ abstract contract ERC404 is IERC404 {
   uint256 private constant _BITMASK_OWNED_INDEX = ((1 << 96) - 1) << 160;
 
   /// @dev Constant for token id encoding
-  uint256 public constant ID_ENCODING_PREFIX = 1 << 255;
+  uint256 public constant ID_ENCODING_PREFIX = (1 << 255);
 
   constructor(string memory name_, string memory symbol_, uint8 decimals_) {
     name = name_;
@@ -492,6 +498,19 @@ abstract contract ERC404 is IERC404 {
     emit ERC20Events.Transfer(from_, to_, value_);
   }
 
+// Function to get the time of the last ERC-721 transfer
+function _getERC721LastTransferTimestamp(uint256 id_) internal view returns (uint256) {
+    return lastTransferTimestamp[id_];
+}
+
+// Function to update the time of the last ERC-721 transfer
+function _updateERC721LastTransferTimestamp(uint256 id_) internal {
+    lastTransferTimestamp[id_] = block.timestamp;
+    // Log the time update event
+    emit TokenTransferWithTimestampUpdated(id_, block.timestamp);
+}
+
+
   /// @notice Consolidated record keeping function for transferring ERC-721s.
   /// @dev Assign the token to the new owner, and remove from the old owner.
   /// Note that this function allows transfers to and from 0x0.
@@ -534,6 +553,9 @@ abstract contract ERC404 is IERC404 {
     }
 
     emit ERC721Events.Transfer(from_, to_, id_);
+
+    _updateERC721LastTransferTimestamp(id_);
+
   }
 
   /// @notice Internal function for ERC-20 transfers. Also handles any ERC-721 transfers that may be required.
@@ -596,7 +618,7 @@ abstract contract ERC404 is IERC404 {
 
       // Whole tokens worth of ERC-20s get transferred as ERC-721s without any burning/minting.
       uint256 nftsToTransfer = value_ / units;
-      for (uint256 i = 0; i < nftsToTransfer; ) {
+      for (uint256 i = 0; i < nftsToTransfer; ) {  
         // Pop from sender's ERC-721 stack and transfer them (LIFO)
         uint256 indexOfLastToken = _owned[from_].length - 1;
         uint256 tokenId = _owned[from_][indexOfLastToken];
@@ -818,4 +840,5 @@ abstract contract ERC404 is IERC404 {
 
     _ownedData[id_] = data;
   }
+
 }
