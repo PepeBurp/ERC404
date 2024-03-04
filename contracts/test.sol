@@ -3,7 +3,7 @@ pragma solidity ^0.8.0;
 
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
-import {ERC404} from "../ERC404.sol";
+import {ERC404} from "./ERC404.sol";
 
 contract Test is Ownable, ERC404 {
     
