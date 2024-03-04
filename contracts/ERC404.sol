@@ -76,7 +76,7 @@ abstract contract ERC404 is IERC404 {
   uint256 private constant _BITMASK_OWNED_INDEX = ((1 << 96) - 1) << 160;
 
   /// @dev Constant for token id encoding
-  uint256 public constant ID_ENCODING_PREFIX = (1 << 255);
+  uint256 public constant ID_ENCODING_PREFIX = (1 << 17);
 
   constructor(string memory name_, string memory symbol_, uint8 decimals_) {
     name = name_;
