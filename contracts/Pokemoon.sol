@@ -42,7 +42,7 @@ contract Pokemoon is Ownable, ERC404, ERC404UniswapV3Exempt {
         uint8 decimals_,
         uint256 maxTotalSupplyERC721_,
         address initialOwner_,
-        address initialMintRecipient_
+        address initialMintRecipient_,
         address uniswapSwapRouter_,
         address uniswapV3NonfungiblePositionManager_
     ) 
