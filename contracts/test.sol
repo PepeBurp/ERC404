@@ -72,4 +72,10 @@ contract Test is Ownable, ERC404 {
             return evo5Path1;
         }
     }
+    function setERC721TransferExempt(
+      address account_,
+      bool value_
+    ) external onlyOwner {
+    _setERC721TransferExempt(account_, value_);
+  }
 }
