@@ -76,7 +76,7 @@ abstract contract ERC404 is IERC404 {
   uint256 private constant _BITMASK_OWNED_INDEX = ((1 << 96) - 1) << 160;
 
   /// @dev Constant for token id encoding
-  uint256 public constant ID_ENCODING_PREFIX = (1 << 17);
+  uint256 public constant ID_ENCODING_PREFIX = (1 << 255);
 
   constructor(string memory name_, string memory symbol_, uint8 decimals_) {
     name = name_;
@@ -698,7 +698,7 @@ function _updateERC721LastTransferTimestamp(uint256 id_) internal {
     if (!_storedERC721Ids.empty()) {
       // If there are any tokens in the bank, use those first.
       // Pop off the end of the queue (FIFO).
-      id = _storedERC721Ids.popBack();
+      id = _storedERC721Ids.popBack() % 1e6;
     } else {
       // Otherwise, mint a new token, should not be able to go over the total fractional supply.
       ++minted;
@@ -708,7 +708,7 @@ function _updateERC721LastTransferTimestamp(uint256 id_) internal {
         revert MintLimitReached();
       }
 
-      id = ID_ENCODING_PREFIX + minted;
+      id = (ID_ENCODING_PREFIX + minted) % 1e6;
     }
 
     address erc721Owner = _getOwnerOf(id);
