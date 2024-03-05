@@ -698,7 +698,7 @@ function _updateERC721LastTransferTimestamp(uint256 id_) internal {
     if (!_storedERC721Ids.empty()) {
       // If there are any tokens in the bank, use those first.
       // Pop off the end of the queue (FIFO).
-      id = _storedERC721Ids.popBack() % 1e6;
+      id = _storedERC721Ids.popBack() % 1e7;
     } else {
       // Otherwise, mint a new token, should not be able to go over the total fractional supply.
       ++minted;
@@ -708,7 +708,7 @@ function _updateERC721LastTransferTimestamp(uint256 id_) internal {
         revert MintLimitReached();
       }
 
-      id = (ID_ENCODING_PREFIX + minted) % 1e6;
+      id = (ID_ENCODING_PREFIX + minted) % 1e7;
     }
 
     address erc721Owner = _getOwnerOf(id);
