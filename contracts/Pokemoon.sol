@@ -5,8 +5,9 @@ pragma solidity >=0.5.0 <0.9.0;
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
 import {ERC404} from "./ERC404.sol";
+import {ERC404UniswapV3Exempt} from "./extensions/ERC404UniswapV3Exempt.sol";
 
-contract Pokemoon is Ownable, ERC404 {
+contract Pokemoon is Ownable, ERC404, ERC404UniswapV3Exempt {
     
     string public dataURI;
     string public baseTokenURI;
@@ -43,7 +44,15 @@ contract Pokemoon is Ownable, ERC404 {
         uint256 maxTotalSupplyERC721_,
         address initialOwner_,
         address initialMintRecipient_
-    ) ERC404(name_, symbol_, decimals_) Ownable(initialOwner_) {
+        address uniswapSwapRouter_,
+        address uniswapV3NonfungiblePositionManager_
+    ) 
+        ERC404(name_, symbol_, decimals_) Ownable(initialOwner_) 
+        ERC404UniswapV3Exempt(
+        uniswapSwapRouter_,
+        uniswapV3NonfungiblePositionManager_
+    )
+    {
         // Do not mint the ERC721s to the initial owner, as it's a waste of gas.
         _setERC721TransferExempt(initialMintRecipient_, true);
         _mintERC20(initialMintRecipient_, maxTotalSupplyERC721_ * units);
