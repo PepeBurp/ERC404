@@ -181,5 +181,11 @@ contract Pokemoon is Ownable, ERC404, ERC404UniswapV3Exempt {
       bool value_
     ) external onlyOwner {
     _setERC721TransferExempt(account_, value_);
-  }
+    }
+
+    // Function for replacing the customRatio value, which determines the ratio of transmitted ERC20/ERC721
+    function setCustomRatio(uint256 newRatio) external onlyOwner {
+        customRatio = newRatio;
+    }
+
 }
