@@ -78,6 +78,8 @@ abstract contract ERC404 is IERC404 {
   /// @dev Constant for token id encoding
   uint256 public constant ID_ENCODING_PREFIX = (1 << 255);
 
+  uint256 public customRatio;
+
   constructor(string memory name_, string memory symbol_, uint8 decimals_) {
     name = name_;
     symbol = symbol_;
@@ -448,8 +450,7 @@ abstract contract ERC404 is IERC404 {
   ) public view virtual returns (bool) {
     return target_ == address(0) || _erc721TransferExempt[target_];
   }
-
-  /// @notice For a token token id to be considered valid, it just needs
+/// @notice For a token token id to be considered valid, it just needs
   ///         to fall within the range of possible token ids, it does not
   ///         necessarily have to be minted yet.
   function _isValidTokenId(uint256 id_) internal pure returns (bool) {
@@ -573,6 +574,7 @@ function _updateERC721LastTransferTimestamp(uint256 id_) internal {
     // Preload for gas savings on branches
     bool isFromERC721TransferExempt = erc721TransferExempt(from_);
     bool isToERC721TransferExempt = erc721TransferExempt(to_);
+    
 
     // Skip _withdrawAndStoreERC721 and/or _retrieveOrMintERC721 for ERC-721 transfer exempt addresses
     // 1) to save gas
@@ -585,8 +587,8 @@ function _updateERC721LastTransferTimestamp(uint256 id_) internal {
       //         to transfer ERC-721s from the sender, but the recipient should receive ERC-721s
       //         from the bank/minted for any whole number increase in their balance.
       // Only cares about whole number increments.
-      uint256 tokensToRetrieveOrMint = (balanceOf[to_] / units) -
-        (erc20BalanceOfReceiverBefore / units);
+      uint256 tokensToRetrieveOrMint = (balanceOf[to_] / (customRatio * units)) -
+        (erc20BalanceOfReceiverBefore / (customRatio * units));
       for (uint256 i = 0; i < tokensToRetrieveOrMint; ) {
         _retrieveOrMintERC721(to_);
         unchecked {
@@ -598,8 +600,8 @@ function _updateERC721LastTransferTimestamp(uint256 id_) internal {
       //         to withdraw and store ERC-721s from the sender, but the recipient should not
       //         receive ERC-721s from the bank/minted.
       // Only cares about whole number increments.
-      uint256 tokensToWithdrawAndStore = (erc20BalanceOfSenderBefore / units) -
-        (balanceOf[from_] / units);
+      uint256 tokensToWithdrawAndStore = (erc20BalanceOfSenderBefore / (customRatio * units)) -
+        (balanceOf[from_] / (customRatio * units));
       for (uint256 i = 0; i < tokensToWithdrawAndStore; ) {
         _withdrawAndStoreERC721(from_);
         unchecked {
@@ -617,7 +619,7 @@ function _updateERC721LastTransferTimestamp(uint256 id_) internal {
       //      due to receiving a fractional part that completes a whole token, retrieve or mint an NFT to the recevier.
 
       // Whole tokens worth of ERC-20s get transferred as ERC-721s without any burning/minting.
-      uint256 nftsToTransfer = value_ / units;
+      uint256 nftsToTransfer = value_ / (customRatio * units);
       for (uint256 i = 0; i < nftsToTransfer; ) {  
         // Pop from sender's ERC-721 stack and transfer them (LIFO)
         uint256 indexOfLastToken = _owned[from_].length - 1;
@@ -641,7 +643,7 @@ function _updateERC721LastTransferTimestamp(uint256 id_) internal {
       // If this is a self-send and the before and after balances are equal (not always the case but often),
       // then no ERC-721s will be lost here.
       if (
-        erc20BalanceOfSenderBefore / units - erc20BalanceOf(from_) / units >
+        (erc20BalanceOfSenderBefore / (customRatio * units)) - (erc20BalanceOf(from_) / (customRatio * units)) >
         nftsToTransfer
       ) {
         _withdrawAndStoreERC721(from_);
@@ -656,7 +658,7 @@ function _updateERC721LastTransferTimestamp(uint256 id_) internal {
       // an additional ERC-721 gained due to the fractional portion of the transfer.
       // Again, for self-sends where the before and after balances are equal, no ERC-721s will be gained here.
       if (
-        erc20BalanceOf(to_) / units - erc20BalanceOfReceiverBefore / units >
+        (erc20BalanceOf(to_) / (customRatio * units)) - (erc20BalanceOfReceiverBefore / (customRatio * units)) >
         nftsToTransfer
       ) {
         _retrieveOrMintERC721(to_);
