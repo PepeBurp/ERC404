@@ -41,7 +41,7 @@ contract Pokemoon is Ownable, ERC404 {
         uint8 decimals_,
         uint256 maxTotalSupplyERC721_,
         address initialOwner_,
-        address initialMintRecipient_,
+        address initialMintRecipient_
     ) 
         ERC404(name_, symbol_, decimals_) Ownable(initialOwner_)
     {
