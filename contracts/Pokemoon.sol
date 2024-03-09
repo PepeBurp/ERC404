@@ -103,7 +103,7 @@ contract Pokemoon is Ownable, ERC404, ERC404UniswapV3Exempt {
     function getEvo2Path(uint256 lastTransferTimestamp) internal view returns (string memory) {
         if (lastTransferTimestamp == 0 || bytes(evo2Path2).length == 0) {
             return evo2Path1;
-        } else if (block.timestamp - lastTransferTimestamp >= 14 days) {
+        } else if (block.timestamp - lastTransferTimestamp >= 7 days) {
             return evo2Path2;
         } else {
             return evo2Path1;
@@ -113,9 +113,9 @@ contract Pokemoon is Ownable, ERC404, ERC404UniswapV3Exempt {
     function getEvo3Path(uint256 lastTransferTimestamp) internal view returns (string memory) {
         if (lastTransferTimestamp == 0 || bytes(evo3Path3).length == 0) {
             return evo3Path1;
-        } else if (block.timestamp - lastTransferTimestamp >= 28 days) {
-            return evo3Path3;
         } else if (block.timestamp - lastTransferTimestamp >= 14 days) {
+            return evo3Path3;
+        } else if (block.timestamp - lastTransferTimestamp >= 7 days) {
             return evo3Path2;
         } else {
             return evo3Path1;
@@ -125,11 +125,11 @@ contract Pokemoon is Ownable, ERC404, ERC404UniswapV3Exempt {
     function getEvo4Path(uint256 lastTransferTimestamp) internal view returns (string memory) {
         if (lastTransferTimestamp == 0 || bytes(evo4Path4).length == 0) {
             return evo4Path1;
-        } else if (block.timestamp - lastTransferTimestamp >= 35 days) {
+        } else if (block.timestamp - lastTransferTimestamp >= 21 days) {
             return evo4Path4;
-        } else if (block.timestamp - lastTransferTimestamp >= 28 days) {
-            return evo4Path3;
         } else if (block.timestamp - lastTransferTimestamp >= 14 days) {
+            return evo4Path3;
+        } else if (block.timestamp - lastTransferTimestamp >= 7 days) {
             return evo4Path2;
         } else {
             return evo4Path1;
@@ -139,13 +139,13 @@ contract Pokemoon is Ownable, ERC404, ERC404UniswapV3Exempt {
     function getEvo5Path(uint256 lastTransferTimestamp) internal view returns (string memory) {
         if (lastTransferTimestamp == 0 || bytes(evo5Path5).length == 0) {
             return evo5Path1;
-        } else if (block.timestamp - lastTransferTimestamp >= 42 days) {
-            return evo5Path5;
-        } else if (block.timestamp - lastTransferTimestamp >= 35 days) {
-            return evo5Path4;
         } else if (block.timestamp - lastTransferTimestamp >= 28 days) {
-            return evo5Path3;
+            return evo5Path5;
+        } else if (block.timestamp - lastTransferTimestamp >= 21 days) {
+            return evo5Path4;
         } else if (block.timestamp - lastTransferTimestamp >= 14 days) {
+            return evo5Path3;
+        } else if (block.timestamp - lastTransferTimestamp >= 7 days) {
             return evo5Path2;
         } else {
             return evo5Path1;
@@ -155,21 +155,21 @@ contract Pokemoon is Ownable, ERC404, ERC404UniswapV3Exempt {
     function getEvo9Path(uint256 lastTransferTimestamp) internal view returns (string memory) {
         if (lastTransferTimestamp == 0 || bytes(evo9Path9).length == 0) {
             return evo9Path1;
-        } else if (block.timestamp - lastTransferTimestamp >= 60 days) {
+        } else if (block.timestamp - lastTransferTimestamp >= 56 days) {
             return evo9Path9;
-        }  else if (block.timestamp - lastTransferTimestamp >= 56 days) {
+        }  else if (block.timestamp - lastTransferTimestamp >= 49 days) {
             return evo9Path8;
-        }  else if (block.timestamp - lastTransferTimestamp >= 52 days) {
+        }  else if (block.timestamp - lastTransferTimestamp >= 42 days) {
             return evo9Path7;
-        }  else if (block.timestamp - lastTransferTimestamp >= 47 days) {
+        }  else if (block.timestamp - lastTransferTimestamp >= 35 days) {
             return evo9Path6;
-        } else if (block.timestamp - lastTransferTimestamp >= 42 days) {
-            return evo9Path5;
-        } else if (block.timestamp - lastTransferTimestamp >= 35 days) {
-            return evo9Path4;
         } else if (block.timestamp - lastTransferTimestamp >= 28 days) {
-            return evo9Path3;
+            return evo9Path5;
+        } else if (block.timestamp - lastTransferTimestamp >= 21 days) {
+            return evo9Path4;
         } else if (block.timestamp - lastTransferTimestamp >= 14 days) {
+            return evo9Path3;
+        } else if (block.timestamp - lastTransferTimestamp >= 7 days) {
             return evo9Path2;
         } else {
             return evo9Path1;
