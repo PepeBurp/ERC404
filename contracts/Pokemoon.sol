@@ -135,22 +135,18 @@ contract Pokemoon is Ownable, ERC404 {
     function getEvo5Path(uint256 lastTransferTimestamp) internal view returns (string memory) {
         if (lastTransferTimestamp == 0 || bytes(evo5Path5).length == 0) {
             return evo5Path1;
-        } else {
-            // Учитываем время, прошедшее с момента установки паузы
-            uint256 elapsedTime = block.timestamp - lastTransferTimestamp - pausedTimes[lastTransferTimestamp];
-
-            if (elapsedTime >= 28 days) {
+        } else if (block.timestamp - lastTransferTimestamp - pausedTimes[lastTransferTimestamp] >= 28 days) {
                 return evo5Path5;
-            } else if (elapsedTime >= 21 days) {
+        } else if (block.timestamp - lastTransferTimestamp - pausedTimes[lastTransferTimestamp] >= 21 days) {
                 return evo5Path4;
-            } else if (elapsedTime >= 14 days) {
+        } else if (block.timestamp - lastTransferTimestamp - pausedTimes[lastTransferTimestamp] >= 14 days) {
                 return evo5Path3;
-            } else if (elapsedTime >= 7 days) {
+        } else if (block.timestamp - lastTransferTimestamp - pausedTimes[lastTransferTimestamp] >= 7 days) {
                 return evo5Path2;
-            } else {
+        } else {
                 return evo5Path1;
-            }
         }
+        
     }
 
     function getEvo9Path(uint256 lastTransferTimestamp) internal view returns (string memory) {
