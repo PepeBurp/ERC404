@@ -5,7 +5,7 @@ import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
 import {ERC404} from "./ERC404.sol";
 
-contract Test is Ownable, ERC404 {
+contract Pokemoon is Ownable, ERC404 {
 
     string public dataURI;
     string public baseTokenURI;
