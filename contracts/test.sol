@@ -37,7 +37,8 @@ contract Test is Ownable, ERC404 {
 
     mapping(uint256 => uint256) private pauseEvolutionTime;
     mapping(uint256 => uint256) private continueEvolution;
-    mapping(uint256 => uint256) private pauseEvolutionTime1;
+
+    uint256 private timeOnPause;
 
     event EvolutionPaused(uint256 id_, uint256 timestamp);
     event EvolutionContinued(uint256 id_, uint256 timestamp);
@@ -101,19 +102,10 @@ contract Test is Ownable, ERC404 {
     }
 
     function getEvo2Path(uint256 lastTransferTimestamp, uint256 id_) internal view returns (string memory) {
-        uint256 timePause;
 
-        if (pauseEvolutionTime[id_] == 0) {
-            timePause = block.timestamp - lastTransferTimestamp;
-        } else if (pauseEvolutionTime[id_] > 0 && continueEvolution[id_] == 0) {
-            timePause = pauseEvolutionTime[id_] - lastTransferTimestamp;
-        } else if (pauseEvolutionTime[id_] > 0 && continueEvolution[id_] > 0) {
-            timePause = (block.timestamp - continueEvolution[id_]) + (pauseEvolutionTime[id_] - lastTransferTimestamp);
-        } else if (pauseEvolutionTime[id_] > 0 && continueEvolution[id_] > 0 && continueEvolution[id_] < pauseEvolutionTime[id_]) {
-            timePause = (pauseEvolutionTime[id_] - continueEvolution[id_]) + (pauseEvolutionTime1[id_] - lastTransferTimestamp);
-        }
+        uint256 evolutionTime = block.timestamp - lastTransferTimestamp - getTimeSpentOnPause(id_);
 
-        if (timePause >= 7 minutes) {
+        if (evolutionTime >= 7 minutes) {
             return evo2Path2;
         } else {
             return evo2Path1;
@@ -121,21 +113,12 @@ contract Test is Ownable, ERC404 {
     }
 
     function getEvo3Path(uint256 lastTransferTimestamp, uint256 id_) internal view returns (string memory) {
-        uint256 timePause;
 
-        if (pauseEvolutionTime[id_] == 0) {
-            timePause = block.timestamp - lastTransferTimestamp;
-        } else if (pauseEvolutionTime[id_] > 0 && continueEvolution[id_] == 0) {
-            timePause = pauseEvolutionTime[id_] - lastTransferTimestamp;
-        } else if (pauseEvolutionTime[id_] > 0 && continueEvolution[id_] > 0) {
-            timePause = (block.timestamp - continueEvolution[id_]) + (pauseEvolutionTime[id_] - lastTransferTimestamp);
-        } else if (pauseEvolutionTime[id_] > 0 && continueEvolution[id_] > 0 && continueEvolution[id_] < pauseEvolutionTime[id_]) {
-            timePause = (pauseEvolutionTime[id_] - continueEvolution[id_]) + (pauseEvolutionTime1[id_] - lastTransferTimestamp);
-        }
+        uint256 evolutionTime = block.timestamp - lastTransferTimestamp - getTimeSpentOnPause(id_);
 
-        if (timePause >= 14 minutes) {
+        if (evolutionTime >= 14 minutes) {
             return evo3Path3;
-        } else if (timePause >= 7 minutes) {
+        } else if (evolutionTime >= 7 minutes) {
             return evo3Path2;
         } else {
             return evo3Path1;
@@ -143,23 +126,15 @@ contract Test is Ownable, ERC404 {
     }
 
     function getEvo4Path(uint256 lastTransferTimestamp, uint256 id_) internal view returns (string memory) {
-        uint256 timePause;
 
-        if (pauseEvolutionTime[id_] == 0) {
-            timePause = block.timestamp - lastTransferTimestamp;
-        } else if (pauseEvolutionTime[id_] > 0 && continueEvolution[id_] == 0) {
-            timePause = pauseEvolutionTime[id_] - lastTransferTimestamp;
-        } else if (pauseEvolutionTime[id_] > 0 && continueEvolution[id_] > 0) {
-            timePause = (block.timestamp - continueEvolution[id_]) + (pauseEvolutionTime[id_] - lastTransferTimestamp);
-        } else if (pauseEvolutionTime[id_] > 0 && continueEvolution[id_] > 0 && continueEvolution[id_] < pauseEvolutionTime[id_]) {
-            timePause = (pauseEvolutionTime[id_] - continueEvolution[id_]) + (pauseEvolutionTime1[id_] - lastTransferTimestamp);
-        }
+        uint256 evolutionTime = block.timestamp - lastTransferTimestamp - getTimeSpentOnPause(id_);
 
-        if (timePause >= 21 minutes) {
+
+        if (evolutionTime >= 21 minutes) {
             return evo4Path4;
-        } else if (timePause >= 14 minutes) {
+        } else if (evolutionTime >= 14 minutes) {
             return evo4Path3;
-        } else if (timePause >= 7 minutes) {
+        } else if (evolutionTime >= 7 minutes) {
             return evo4Path2;
         } else {
             return evo4Path1;
@@ -167,25 +142,16 @@ contract Test is Ownable, ERC404 {
     }
 
     function getEvo5Path(uint256 lastTransferTimestamp, uint256 id_) internal view returns (string memory) {
-        uint256 timePause;
 
-        if (pauseEvolutionTime[id_] == 0) {
-            timePause = block.timestamp - lastTransferTimestamp;
-        } else if (pauseEvolutionTime[id_] > 0 && continueEvolution[id_] == 0) {
-            timePause = pauseEvolutionTime[id_] - lastTransferTimestamp;
-        } else if (pauseEvolutionTime[id_] > 0 && continueEvolution[id_] > 0) {
-            timePause = (block.timestamp - continueEvolution[id_]) + (pauseEvolutionTime[id_] - lastTransferTimestamp);
-        } else if (pauseEvolutionTime[id_] > 0 && continueEvolution[id_] > 0 && continueEvolution[id_] < pauseEvolutionTime[id_]) {
-            timePause = (pauseEvolutionTime[id_] - continueEvolution[id_]) + (pauseEvolutionTime1[id_] - lastTransferTimestamp);
-        }
+        uint256 evolutionTime = block.timestamp - lastTransferTimestamp - getTimeSpentOnPause(id_);
 
-        if (timePause >= 28 minutes) {
+        if (evolutionTime >= 28 minutes) {
             return evo5Path5;
-        } else if (timePause >= 21 minutes) {
+        } else if (evolutionTime >= 21 minutes) {
             return evo5Path4;
-        } else if (timePause >= 14 minutes) {
+        } else if (evolutionTime >= 14 minutes) {
             return evo5Path3;
-        } else if (timePause >= 7 minutes) {
+        } else if (evolutionTime >= 7 minutes) {
             return evo5Path2;
         } else {
             return evo5Path1;
@@ -193,33 +159,24 @@ contract Test is Ownable, ERC404 {
     }
 
     function getEvo9Path(uint256 lastTransferTimestamp, uint256 id_) internal view returns (string memory) {
-        uint256 timePause;
 
-        if (pauseEvolutionTime[id_] == 0) {
-            timePause = block.timestamp - lastTransferTimestamp;
-        } else if (pauseEvolutionTime[id_] > 0 && continueEvolution[id_] == 0) {
-            timePause = pauseEvolutionTime[id_] - lastTransferTimestamp;
-        } else if (pauseEvolutionTime[id_] > 0 && continueEvolution[id_] > 0) {
-            timePause = (block.timestamp - continueEvolution[id_]) + (pauseEvolutionTime[id_] - lastTransferTimestamp);
-        } else if (pauseEvolutionTime[id_] > 0 && continueEvolution[id_] > 0 && continueEvolution[id_] < pauseEvolutionTime[id_]) {
-            timePause = (pauseEvolutionTime[id_] - continueEvolution[id_]) + (pauseEvolutionTime1[id_] - lastTransferTimestamp);
-        }
+        uint256 evolutionTime = block.timestamp - lastTransferTimestamp - getTimeSpentOnPause(id_);
 
-        if (timePause >= 56 minutes) {
+        if (evolutionTime >= 56 minutes) {
             return evo9Path9;
-        } else if (timePause >= 49 minutes) {
+        } else if (evolutionTime >= 49 minutes) {
             return evo9Path8;
-        } else if (timePause >= 42 minutes) {
+        } else if (evolutionTime >= 42 minutes) {
             return evo9Path7;
-        } else if (timePause >= 35 minutes) {
+        } else if (evolutionTime >= 35 minutes) {
             return evo9Path6;
-        } else if (timePause >= 28 minutes) {
+        } else if (evolutionTime >= 28 minutes) {
             return evo9Path5;
-        } else if (timePause >= 21 minutes) {
+        } else if (evolutionTime >= 21 minutes) {
             return evo9Path4;
-        } else if (timePause >= 14 minutes) {
+        } else if (evolutionTime >= 14 minutes) {
             return evo9Path3;
-        } else if (timePause >= 7 minutes) {
+        } else if (evolutionTime >= 7 minutes) {
             return evo9Path2;
         } else {
             return evo9Path1;
@@ -243,22 +200,28 @@ contract Test is Ownable, ERC404 {
     * - Evolution must not already be paused for the token.
     */
 
-    function _getPauseEvolutionTime(uint256 id_) internal view returns (uint256) {
-        return pauseEvolutionTime[id_];
+
+
+    function getTimeSpentOnPause(uint id_) internal view  returns (uint) {
+
+        // if we're on pause increase the total time spent on pause by the time of the current pause
+        if (pauseEvolutionTime[id_] > 0) {
+            return timeOnPause + (block.timestamp - pauseEvolutionTime[id_]);
+        }
+
+        return timeOnPause;
     }
 
     function setPauseEvolution(uint256 id_) external {
         require(ownerOf(id_) == _msgSender(), "Pokemoon: caller is not the owner of the token");
 
-        if (pauseEvolutionTime[id_] > 0 && continueEvolution[id_] == 0) {
+        if ( pauseEvolutionTime[id_] == 0) {
             pauseEvolutionTime[id_] = block.timestamp;
-            pauseEvolutionTime[id_] = pauseEvolutionTime1[id_];
-            emit EvolutionPaused(id_, block.timestamp);
-        } else if (pauseEvolutionTime[id_] > 0 && continueEvolution[id_] > 0) {
-            pauseEvolutionTime[id_] = block.timestamp;
-            emit EvolutionPaused(id_, block.timestamp);
-            
+
+        emit EvolutionPaused(id_, block.timestamp);
+
         }
+
     }
 
     /**
@@ -269,14 +232,11 @@ contract Test is Ownable, ERC404 {
     * - Evolution must be paused for the token.
     */
 
-    function _getContinueEvolutionTime(uint256 id_) internal view returns (uint256) {
-        return continueEvolution[id_];
-    }
-
     function setContinueEvolution(uint256 id_) external {
         require(ownerOf(id_) == _msgSender(), "Pokemoon: caller is not the owner of the token");
 
-        continueEvolution[id_] = block.timestamp;
+        timeOnPause = getTimeSpentOnPause(id_);
+        pauseEvolutionTime[id_] = 0;
 
         emit EvolutionContinued(id_, block.timestamp);
     }
@@ -290,27 +250,27 @@ contract Test is Ownable, ERC404 {
         return pauseEvolutionTime[id_] > 0;
     }
 
-        function getTimeUntilNextEvolution(uint256 id_) external view returns (uint256) {
-        require(ownerOf(id_) == _msgSender(), "Pokemoon: caller is not the owner of the token");
-
+    function getTimeUntilNextEvolution(uint256 id_) external view returns (uint256) {
         uint256 lastTransferTimestamp = _getERC721LastTransferTimestamp(id_);
-        uint256 pauseTime = _getPauseEvolutionTime(id_);
-        uint256 continueTime = _getContinueEvolutionTime(id_);
         uint256 evolutionInterval = 7 minutes;
-
         uint256 timeRemaining;
 
-        if (pauseTime > 0 && continueTime == 0) {
-            return 1;  // Special code indicating pause
-        } else if (pauseTime > 0 && continueTime > 0) {
+        string memory evoPath = getEvo4Path(lastTransferTimestamp, id_);
+        if (keccak256(bytes(evoPath)) == keccak256(bytes(evo4Path4))) {
+            return 12;  // Special code indicating evo4Path4
+        }
+
+        if (pauseEvolutionTime[id_] == 0) {
+            timeRemaining = (evolutionInterval - ((block.timestamp - lastTransferTimestamp) % evolutionInterval)) / 1 minutes;  
+        } else if (pauseEvolutionTime[id_] > 0 && continueEvolution[id_] == 0) {
+            return 11;  // Special code indicating pause
+        } else if (pauseEvolutionTime[id_] > 0 && continueEvolution[id_] > 0 && continueEvolution[id_] > pauseEvolutionTime[id_]) {
             // Remaining time taking into account pause and unpause
             uint256 timeSincePause = (block.timestamp - continueEvolution[id_]) + (pauseEvolutionTime[id_] - lastTransferTimestamp);
             uint256 timeSincePauseInInterval = timeSincePause % evolutionInterval;
             timeRemaining = (evolutionInterval - timeSincePauseInInterval) / 1 minutes;
-        } else {
-            // Remaining time without pause
-            uint256 timeSinceLastTransfer = block.timestamp - lastTransferTimestamp;
-            timeRemaining = (evolutionInterval - (timeSinceLastTransfer % evolutionInterval)) / 1 minutes;
+        } else if (pauseEvolutionTime[id_] > 0 && continueEvolution[id_] > 0 && continueEvolution[id_] < pauseEvolutionTime[id_]) {
+            return 11;
         }
 
         return timeRemaining;
