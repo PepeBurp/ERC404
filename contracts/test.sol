@@ -253,26 +253,54 @@ contract Test is Ownable, ERC404 {
     function getTimeUntilNextEvolution(uint256 id_) external view returns (uint256) {
         uint256 lastTransferTimestamp = _getERC721LastTransferTimestamp(id_);
         uint256 evolutionInterval = 7 minutes;
+
         uint256 timeRemaining;
 
-        string memory evoPath = getEvo4Path(lastTransferTimestamp, id_);
-        if (keccak256(bytes(evoPath)) == keccak256(bytes(evo4Path4))) {
-            return 12;  // Special code indicating evo4Path4
+            // Check if evolution is paused
+        if (pauseEvolutionTime[id_] > 0) {
+            // Check if evolution is paused and not resumed
+        if (continueEvolution[id_] == 0) {
+            return 11; // Special code indicating pause
         }
 
-        if (pauseEvolutionTime[id_] == 0) {
-            timeRemaining = (evolutionInterval - ((block.timestamp - lastTransferTimestamp) % evolutionInterval)) / 1 minutes;  
-        } else if (pauseEvolutionTime[id_] > 0 && continueEvolution[id_] == 0) {
-            return 11;  // Special code indicating pause
-        } else if (pauseEvolutionTime[id_] > 0 && continueEvolution[id_] > 0 && continueEvolution[id_] > pauseEvolutionTime[id_]) {
-            // Remaining time taking into account pause and unpause
-            uint256 timeSincePause = (block.timestamp - continueEvolution[id_]) + (pauseEvolutionTime[id_] - lastTransferTimestamp);
-            uint256 timeSincePauseInInterval = timeSincePause % evolutionInterval;
-            timeRemaining = (evolutionInterval - timeSincePauseInInterval) / 1 minutes;
-        } else if (pauseEvolutionTime[id_] > 0 && continueEvolution[id_] > 0 && continueEvolution[id_] < pauseEvolutionTime[id_]) {
-            return 11;
-        }
+        // Calculate time remaining after considering pause and resume
+        uint256 timeSincePause = block.timestamp - continueEvolution[id_];
+        uint256 timePaused = pauseEvolutionTime[id_] - lastTransferTimestamp;
+        timeRemaining = (evolutionInterval - (timeSincePause + timePaused) % evolutionInterval) / 1 minutes;
 
         return timeRemaining;
+    }
+
+    // Calculate time remaining until next evolution
+    uint256 timeSinceLastTransfer = block.timestamp - lastTransferTimestamp;
+    timeRemaining = (evolutionInterval - timeSinceLastTransfer % evolutionInterval) / 1 minutes;
+
+    // Special case for evo2Path2
+            string memory evoPath2 = getEvo2Path(lastTransferTimestamp, id_);
+        if (keccak256(bytes(evoPath2)) == keccak256(bytes(evo2Path2))) {
+            return 12; // Special code indicating evo4Path4
+        }
+
+        string memory evoPath3 = getEvo3Path(lastTransferTimestamp, id_);
+        if (keccak256(bytes(evoPath3)) == keccak256(bytes(evo3Path3))) {
+            return 12; // Special code indicating evo4Path4
+        }
+
+        string memory evoPath4 = getEvo4Path(lastTransferTimestamp, id_);
+        if (keccak256(bytes(evoPath4)) == keccak256(bytes(evo4Path4))) {
+            return 12; // Special code indicating evo4Path4
+        }
+
+        string memory evoPath5 = getEvo4Path(lastTransferTimestamp, id_);
+        if (keccak256(bytes(evoPath5)) == keccak256(bytes(evo5Path5))) {
+            return 12; // Special code indicating evo4Path4
+        }
+
+        string memory evoPath9 = getEvo4Path(lastTransferTimestamp, id_);
+        if (keccak256(bytes(evoPath9)) == keccak256(bytes(evo9Path9))) {
+            return 12; // Special code indicating evo4Path4
+        }
+
+    return timeRemaining;
     }
 }
