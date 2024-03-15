@@ -5,7 +5,7 @@ import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {Strings} from "@openzeppelin/contracts/utils/Strings.sol";
 import {ERC404} from "./ERC404.sol";
 
-contract Pokemoon is Ownable, ERC404 {
+contract Test is Ownable, ERC404 {
 
     string public dataURI;
     string public baseTokenURI;
@@ -35,8 +35,12 @@ contract Pokemoon is Ownable, ERC404 {
     string private constant evo9Path8 = "evo9/8/";
     string private constant evo9Path9 = "evo9/9/";
 
-    // Mapping для хранения времени паузы эволюции для каждого токена
-    mapping(uint256 => uint256) private pausedTimes; 
+    mapping(uint256 => uint256) private pauseEvolutionTime;
+    mapping(uint256 => uint256) private continueEvolution;
+    mapping(uint256 => uint256) private pauseEvolutionTime1;
+
+    event EvolutionPaused(uint256 id_, uint256 timestamp);
+    event EvolutionContinued(uint256 id_, uint256 timestamp);
 
     constructor(
         string memory name_,
@@ -74,19 +78,19 @@ contract Pokemoon is Ownable, ERC404 {
                 folderPath = evo1Path;
                 jsonFileName = string.concat(Strings.toString((id_ % 203) + 1), ".json");
             } else if (seed <= 160) {
-                folderPath = getEvo2Path(lastTransferTimestamp);
+                folderPath = getEvo2Path(lastTransferTimestamp, id_);
                 jsonFileName = string.concat(Strings.toString((id_ % 213) + 1), ".json");
             } else if (seed <= 210) {
-                folderPath = getEvo3Path(lastTransferTimestamp);
+                folderPath = getEvo3Path(lastTransferTimestamp, id_);
                 jsonFileName = string.concat(Strings.toString((id_ % 117) + 1), ".json");
             } else if (seed <= 235) {
-                folderPath = getEvo4Path(lastTransferTimestamp);
+                folderPath = getEvo4Path(lastTransferTimestamp, id_);
                 jsonFileName = string.concat(Strings.toString((id_ % 5) + 1), ".json");
             } else if (seed <= 250) {
-                folderPath = getEvo5Path(lastTransferTimestamp);
+                folderPath = getEvo5Path(lastTransferTimestamp, id_);
                 jsonFileName = string.concat(Strings.toString((id_ % 2) + 1), ".json");
             } else if (seed <= 255) {
-                folderPath = getEvo9Path(lastTransferTimestamp);
+                folderPath = getEvo9Path(lastTransferTimestamp, id_);
                 jsonFileName = "1.json";
             }
 
@@ -96,76 +100,126 @@ contract Pokemoon is Ownable, ERC404 {
         }
     }
 
-    function getEvo2Path(uint256 lastTransferTimestamp) internal view returns (string memory) {
-        if (lastTransferTimestamp == 0 || bytes(evo2Path2).length == 0) {
-            return evo2Path1;
-        } else if (block.timestamp - lastTransferTimestamp - pausedTimes[lastTransferTimestamp] >= 5 minutes) {
+    function getEvo2Path(uint256 lastTransferTimestamp, uint256 id_) internal view returns (string memory) {
+        uint256 timePause;
+
+        if (pauseEvolutionTime[id_] == 0) {
+            timePause = block.timestamp - lastTransferTimestamp;
+        } else if (pauseEvolutionTime[id_] > 0 && continueEvolution[id_] == 0) {
+            timePause = pauseEvolutionTime[id_] - lastTransferTimestamp;
+        } else if (pauseEvolutionTime[id_] > 0 && continueEvolution[id_] > 0) {
+            timePause = (block.timestamp - continueEvolution[id_]) + (pauseEvolutionTime[id_] - lastTransferTimestamp);
+        } else if (pauseEvolutionTime[id_] > 0 && continueEvolution[id_] > 0 && continueEvolution[id_] < pauseEvolutionTime[id_]) {
+            timePause = (pauseEvolutionTime[id_] - continueEvolution[id_]) + (pauseEvolutionTime1[id_] - lastTransferTimestamp);
+        }
+
+        if (timePause >= 7 minutes) {
             return evo2Path2;
         } else {
             return evo2Path1;
         }
     }
 
-    function getEvo3Path(uint256 lastTransferTimestamp) internal view returns (string memory) {
-        if (lastTransferTimestamp == 0 || bytes(evo3Path3).length == 0) {
-            return evo3Path1;
-        } else if (block.timestamp - lastTransferTimestamp - pausedTimes[lastTransferTimestamp] >= 7 minutes) {
+    function getEvo3Path(uint256 lastTransferTimestamp, uint256 id_) internal view returns (string memory) {
+        uint256 timePause;
+
+        if (pauseEvolutionTime[id_] == 0) {
+            timePause = block.timestamp - lastTransferTimestamp;
+        } else if (pauseEvolutionTime[id_] > 0 && continueEvolution[id_] == 0) {
+            timePause = pauseEvolutionTime[id_] - lastTransferTimestamp;
+        } else if (pauseEvolutionTime[id_] > 0 && continueEvolution[id_] > 0) {
+            timePause = (block.timestamp - continueEvolution[id_]) + (pauseEvolutionTime[id_] - lastTransferTimestamp);
+        } else if (pauseEvolutionTime[id_] > 0 && continueEvolution[id_] > 0 && continueEvolution[id_] < pauseEvolutionTime[id_]) {
+            timePause = (pauseEvolutionTime[id_] - continueEvolution[id_]) + (pauseEvolutionTime1[id_] - lastTransferTimestamp);
+        }
+
+        if (timePause >= 14 minutes) {
             return evo3Path3;
-        } else if (block.timestamp - lastTransferTimestamp - pausedTimes[lastTransferTimestamp] >= 5 minutes) {
+        } else if (timePause >= 7 minutes) {
             return evo3Path2;
         } else {
             return evo3Path1;
         }
     }
 
-    function getEvo4Path(uint256 lastTransferTimestamp) internal view returns (string memory) {
-        if (lastTransferTimestamp == 0 || bytes(evo4Path4).length == 0) {
-            return evo4Path1;
-        } else if (block.timestamp - lastTransferTimestamp - pausedTimes[lastTransferTimestamp] >= 9 minutes) {
+    function getEvo4Path(uint256 lastTransferTimestamp, uint256 id_) internal view returns (string memory) {
+        uint256 timePause;
+
+        if (pauseEvolutionTime[id_] == 0) {
+            timePause = block.timestamp - lastTransferTimestamp;
+        } else if (pauseEvolutionTime[id_] > 0 && continueEvolution[id_] == 0) {
+            timePause = pauseEvolutionTime[id_] - lastTransferTimestamp;
+        } else if (pauseEvolutionTime[id_] > 0 && continueEvolution[id_] > 0) {
+            timePause = (block.timestamp - continueEvolution[id_]) + (pauseEvolutionTime[id_] - lastTransferTimestamp);
+        } else if (pauseEvolutionTime[id_] > 0 && continueEvolution[id_] > 0 && continueEvolution[id_] < pauseEvolutionTime[id_]) {
+            timePause = (pauseEvolutionTime[id_] - continueEvolution[id_]) + (pauseEvolutionTime1[id_] - lastTransferTimestamp);
+        }
+
+        if (timePause >= 21 minutes) {
             return evo4Path4;
-        } else if (block.timestamp - lastTransferTimestamp - pausedTimes[lastTransferTimestamp] >= 7 minutes) {
+        } else if (timePause >= 14 minutes) {
             return evo4Path3;
-        } else if (block.timestamp - lastTransferTimestamp - pausedTimes[lastTransferTimestamp] >= 5 minutes) {
+        } else if (timePause >= 7 minutes) {
             return evo4Path2;
         } else {
             return evo4Path1;
         }
     }
 
-    function getEvo5Path(uint256 lastTransferTimestamp) internal view returns (string memory) {
-        if (lastTransferTimestamp == 0 || bytes(evo5Path5).length == 0) {
-            return evo5Path1;
-        } else if (block.timestamp - lastTransferTimestamp - pausedTimes[lastTransferTimestamp] >= 11 minutes) {
-                return evo5Path5;
-        } else if (block.timestamp - lastTransferTimestamp - pausedTimes[lastTransferTimestamp] >= 9 minutes) {
-                return evo5Path4;
-        } else if (block.timestamp - lastTransferTimestamp - pausedTimes[lastTransferTimestamp] >= 7 minutes) {
-                return evo5Path3;
-        } else if (block.timestamp - lastTransferTimestamp - pausedTimes[lastTransferTimestamp] >= 5 minutes) {
-                return evo5Path2;
+    function getEvo5Path(uint256 lastTransferTimestamp, uint256 id_) internal view returns (string memory) {
+        uint256 timePause;
+
+        if (pauseEvolutionTime[id_] == 0) {
+            timePause = block.timestamp - lastTransferTimestamp;
+        } else if (pauseEvolutionTime[id_] > 0 && continueEvolution[id_] == 0) {
+            timePause = pauseEvolutionTime[id_] - lastTransferTimestamp;
+        } else if (pauseEvolutionTime[id_] > 0 && continueEvolution[id_] > 0) {
+            timePause = (block.timestamp - continueEvolution[id_]) + (pauseEvolutionTime[id_] - lastTransferTimestamp);
+        } else if (pauseEvolutionTime[id_] > 0 && continueEvolution[id_] > 0 && continueEvolution[id_] < pauseEvolutionTime[id_]) {
+            timePause = (pauseEvolutionTime[id_] - continueEvolution[id_]) + (pauseEvolutionTime1[id_] - lastTransferTimestamp);
+        }
+
+        if (timePause >= 28 minutes) {
+            return evo5Path5;
+        } else if (timePause >= 21 minutes) {
+            return evo5Path4;
+        } else if (timePause >= 14 minutes) {
+            return evo5Path3;
+        } else if (timePause >= 7 minutes) {
+            return evo5Path2;
         } else {
-                return evo5Path1;
+            return evo5Path1;
         }
     }
 
-    function getEvo9Path(uint256 lastTransferTimestamp) internal view returns (string memory) {
-        if (lastTransferTimestamp == 0 || bytes(evo9Path9).length == 0) {
-            return evo9Path1;
-        } else if (block.timestamp - lastTransferTimestamp - pausedTimes[lastTransferTimestamp] >= 19 minutes) {
+    function getEvo9Path(uint256 lastTransferTimestamp, uint256 id_) internal view returns (string memory) {
+        uint256 timePause;
+
+        if (pauseEvolutionTime[id_] == 0) {
+            timePause = block.timestamp - lastTransferTimestamp;
+        } else if (pauseEvolutionTime[id_] > 0 && continueEvolution[id_] == 0) {
+            timePause = pauseEvolutionTime[id_] - lastTransferTimestamp;
+        } else if (pauseEvolutionTime[id_] > 0 && continueEvolution[id_] > 0) {
+            timePause = (block.timestamp - continueEvolution[id_]) + (pauseEvolutionTime[id_] - lastTransferTimestamp);
+        } else if (pauseEvolutionTime[id_] > 0 && continueEvolution[id_] > 0 && continueEvolution[id_] < pauseEvolutionTime[id_]) {
+            timePause = (pauseEvolutionTime[id_] - continueEvolution[id_]) + (pauseEvolutionTime1[id_] - lastTransferTimestamp);
+        }
+
+        if (timePause >= 56 minutes) {
             return evo9Path9;
-        }  else if (block.timestamp - lastTransferTimestamp - pausedTimes[lastTransferTimestamp] >= 17 minutes) {
+        } else if (timePause >= 49 minutes) {
             return evo9Path8;
-        }  else if (block.timestamp - lastTransferTimestamp - pausedTimes[lastTransferTimestamp] >= 15 minutes) {
+        } else if (timePause >= 42 minutes) {
             return evo9Path7;
-        }  else if (block.timestamp - lastTransferTimestamp - pausedTimes[lastTransferTimestamp] >= 13 minutes) {
+        } else if (timePause >= 35 minutes) {
             return evo9Path6;
-        } else if (block.timestamp - lastTransferTimestamp - pausedTimes[lastTransferTimestamp] >= 11 minutes) {
+        } else if (timePause >= 28 minutes) {
             return evo9Path5;
-        } else if (block.timestamp - lastTransferTimestamp - pausedTimes[lastTransferTimestamp] >= 9 minutes) {
+        } else if (timePause >= 21 minutes) {
             return evo9Path4;
-        } else if (block.timestamp - lastTransferTimestamp - pausedTimes[lastTransferTimestamp] >= 7 minutes) {
+        } else if (timePause >= 14 minutes) {
             return evo9Path3;
-        } else if (block.timestamp - lastTransferTimestamp - pausedTimes[lastTransferTimestamp] >= 5 minutes) {
+        } else if (timePause >= 7 minutes) {
             return evo9Path2;
         } else {
             return evo9Path1;
@@ -181,27 +235,84 @@ contract Pokemoon is Ownable, ERC404 {
         customRatio = newRatio;
     }
 
-    // Function to pause evolution for a specific token
-    function pauseEvolution(uint256 id_) external {
-        require(ownerOf(id_) == _msgSender(), "Pokemoon: caller is not the owner of the token");
-        require(pausedTimes[id_] == 0, "Pokemoon: evolution is already paused");
+    /**
+    * @dev Function to pause evolution for a specific token.
+    * @param id_ The ID of the token to pause evolution for.
+    * Requirements:
+    * - The caller must be the owner of the token.
+    * - Evolution must not already be paused for the token.
+    */
 
-        pausedTimes[id_] = block.timestamp - _getERC721LastTransferTimestamp(id_);
+    function _getPauseEvolutionTime(uint256 id_) internal view returns (uint256) {
+        return pauseEvolutionTime[id_];
     }
 
-    // Function to resume evolution for a specific token
-    function continueEvolution(uint256 id_) external {
+    function setPauseEvolution(uint256 id_) external {
         require(ownerOf(id_) == _msgSender(), "Pokemoon: caller is not the owner of the token");
-        require(pausedTimes[id_] > 0, "Pokemoon: evolution is not paused");
 
-        // Update the last transfer timestamp to account for the time paused
-        _updateERC721LastTransferTimestamp(id_);
-        // Reset the paused time
-        pausedTimes[id_] = 0;
+        if (pauseEvolutionTime[id_] > 0 && continueEvolution[id_] == 0) {
+            pauseEvolutionTime[id_] = block.timestamp;
+            pauseEvolutionTime[id_] = pauseEvolutionTime1[id_];
+            emit EvolutionPaused(id_, block.timestamp);
+        } else if (pauseEvolutionTime[id_] > 0 && continueEvolution[id_] > 0) {
+            pauseEvolutionTime[id_] = block.timestamp;
+            emit EvolutionPaused(id_, block.timestamp);
+            
+        }
     }
 
-    // Function to check if evolution is paused for a specific token
+    /**
+    * @dev Function to resume evolution for a specific token.
+    * @param id_ The ID of the token to resume evolution for.
+    * Requirements:
+    * - The caller must be the owner of the token.
+    * - Evolution must be paused for the token.
+    */
+
+    function _getContinueEvolutionTime(uint256 id_) internal view returns (uint256) {
+        return continueEvolution[id_];
+    }
+
+    function setContinueEvolution(uint256 id_) external {
+        require(ownerOf(id_) == _msgSender(), "Pokemoon: caller is not the owner of the token");
+
+        continueEvolution[id_] = block.timestamp;
+
+        emit EvolutionContinued(id_, block.timestamp);
+    }
+
+    /**
+    * @dev Function to check if evolution is paused for a specific token.
+    * @param id_ The ID of the token to check.
+    * @return A boolean indicating whether evolution is paused for the token.
+    */
     function isEvolutionPaused(uint256 id_) external view returns (bool) {
-        return pausedTimes[id_] > 0;
+        return pauseEvolutionTime[id_] > 0;
+    }
+
+        function getTimeUntilNextEvolution(uint256 id_) external view returns (uint256) {
+        require(ownerOf(id_) == _msgSender(), "Pokemoon: caller is not the owner of the token");
+
+        uint256 lastTransferTimestamp = _getERC721LastTransferTimestamp(id_);
+        uint256 pauseTime = _getPauseEvolutionTime(id_);
+        uint256 continueTime = _getContinueEvolutionTime(id_);
+        uint256 evolutionInterval = 7 minutes;
+
+        uint256 timeRemaining;
+
+        if (pauseTime > 0 && continueTime == 0) {
+            return 1;  // Special code indicating pause
+        } else if (pauseTime > 0 && continueTime > 0) {
+            // Remaining time taking into account pause and unpause
+            uint256 timeSincePause = (block.timestamp - continueEvolution[id_]) + (pauseEvolutionTime[id_] - lastTransferTimestamp);
+            uint256 timeSincePauseInInterval = timeSincePause % evolutionInterval;
+            timeRemaining = (evolutionInterval - timeSincePauseInInterval) / 1 minutes;
+        } else {
+            // Remaining time without pause
+            uint256 timeSinceLastTransfer = block.timestamp - lastTransferTimestamp;
+            timeRemaining = (evolutionInterval - (timeSinceLastTransfer % evolutionInterval)) / 1 minutes;
+        }
+
+        return timeRemaining;
     }
 }
