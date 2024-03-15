@@ -67,7 +67,7 @@ abstract contract ERC404 is IERC404 {
   mapping(uint256 => uint256) private lastTransferTimestamp;
 
   // Event for logging the update of the time of the last transfer
-  event TokenTransferWithTimestampUpdated(uint256 tokenId, uint256 timestamp);
+  event TokenTransferWithTimestampUpdated(uint256 id_, uint256 timestamp);
 
   /// @dev Address bitmask for packed ownership data
   uint256 private constant _BITMASK_ADDRESS = (1 << 160) - 1;
@@ -454,7 +454,7 @@ abstract contract ERC404 is IERC404 {
   ///         to fall within the range of possible token ids, it does not
   ///         necessarily have to be minted yet.
   function _isValidTokenId(uint256 id_) internal pure returns (bool) {
-    return id_ > ID_ENCODING_PREFIX && id_ != type(uint256).max;
+    return id_ > ID_ENCODING_PREFIX % 1e7 && id_ != type(uint256).max;
   }
 
   /// @notice Internal function to compute domain separator for EIP-2612 permits
@@ -679,7 +679,7 @@ function _updateERC721LastTransferTimestamp(uint256 id_) internal {
       revert InvalidRecipient();
     }
 
-    if (totalSupply + value_ > ID_ENCODING_PREFIX) {
+    if (totalSupply + value_ > ID_ENCODING_PREFIX / 1e7) {
       revert MintLimitReached();
     }
 
@@ -700,7 +700,7 @@ function _updateERC721LastTransferTimestamp(uint256 id_) internal {
     if (!_storedERC721Ids.empty()) {
       // If there are any tokens in the bank, use those first.
       // Pop off the end of the queue (FIFO).
-      id = _storedERC721Ids.popBack() % 1e7;
+      id = _storedERC721Ids.popBack();
     } else {
       // Otherwise, mint a new token, should not be able to go over the total fractional supply.
       ++minted;
