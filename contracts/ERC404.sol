@@ -80,6 +80,13 @@ abstract contract ERC404 is IERC404 {
 
   uint256 public customRatio;
 
+  mapping(uint256 => uint256) private pauseEvolutionTime;
+  mapping(uint256 => uint256) private continueEvolution;
+  mapping(uint256 => uint256) private timeOnPause;
+
+  event EvolutionPaused(uint256 id_, uint256 timestamp);
+  event EvolutionContinued(uint256 id_, uint256 timestamp);
+
   constructor(string memory name_, string memory symbol_, uint8 decimals_) {
     name = name_;
     symbol = symbol_;
@@ -499,17 +506,44 @@ abstract contract ERC404 is IERC404 {
     emit ERC20Events.Transfer(from_, to_, value_);
   }
 
-// Function to get the time of the last ERC-721 transfer
-function _getERC721LastTransferTimestamp(uint256 id_) internal view returns (uint256) {
-    return lastTransferTimestamp[id_];
-}
+  // Function to get the time of the last ERC-721 transfer
+  function _getERC721LastTransferTimestamp(uint256 id_) internal view returns (uint256) {
+      return lastTransferTimestamp[id_];
+  }
 
-// Function to update the time of the last ERC-721 transfer
-function _updateERC721LastTransferTimestamp(uint256 id_) internal {
+  // Function to update the time of the last ERC-721 transfer
+  function _updateERC721LastTransferTimestamp(uint256 id_) internal {
     lastTransferTimestamp[id_] = block.timestamp;
     // Log the time update event
     emit TokenTransferWithTimestampUpdated(id_, block.timestamp);
-}
+  }
+
+
+  function getTimeSpentOnPause(uint256 id_) internal view returns (uint256) {
+    // Return the time spent on pause for the specific token
+      return timeOnPause[id_];
+  }
+
+  function setPauseEvolution(uint256 id_) external {
+    require(ownerOf(id_) == msg.sender, "Pokemoon: caller is not the owner of the token");
+
+    if ( pauseEvolutionTime[id_] == 0) {
+        pauseEvolutionTime[id_] = block.timestamp;
+
+    emit EvolutionPaused(id_, block.timestamp);
+
+    }
+
+  }
+
+    function setContinueEvolution(uint256 id_) external {
+        require(ownerOf(id_) == msg.sender, "Pokemoon: caller is not the owner of the token");
+
+        timeOnPause[id_] += block.timestamp - getTimeSpentOnPause(id_);
+        pauseEvolutionTime[id_] = 0;
+
+        emit EvolutionContinued(id_, block.timestamp);
+    }
 
 
   /// @notice Consolidated record keeping function for transferring ERC-721s.
@@ -556,6 +590,9 @@ function _updateERC721LastTransferTimestamp(uint256 id_) internal {
     emit ERC721Events.Transfer(from_, to_, id_);
 
     _updateERC721LastTransferTimestamp(id_);
+
+    pauseEvolutionTime[id_] = 0;
+    timeOnPause[id_] = 0;
 
   }
 
@@ -842,5 +879,25 @@ function _updateERC721LastTransferTimestamp(uint256 id_) internal {
 
     _ownedData[id_] = data;
   }
+
+  function containsSubstring(string memory str, string memory substr) internal pure returns (bool) {
+    bytes memory strBytes = bytes(str);
+    bytes memory substrBytes = bytes(substr);
+
+    for (uint i = 0; i <= strBytes.length - substrBytes.length; i++) {
+        bool found = true;
+        for (uint j = 0; j < substrBytes.length; j++) {
+            if (strBytes[i + j] != substrBytes[j]) {
+                found = false;
+                break;
+            }
+        }
+        if (found) {
+            return true;
+        }
+    }
+    return false;
+  }
+
 
 }
