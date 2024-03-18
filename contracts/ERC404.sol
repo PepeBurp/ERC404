@@ -518,12 +518,25 @@ abstract contract ERC404 is IERC404 {
     emit TokenTransferWithTimestampUpdated(id_, block.timestamp);
   }
 
+  function getPauseEvolutionTime(uint256 id_) internal view returns (uint256) {
+    return pauseEvolutionTime[id_];
+  }
 
   function getTimeSpentOnPause(uint256 id_) internal view returns (uint256) {
     // Return the time spent on pause for the specific token
-      return timeOnPause[id_];
+    if (pauseEvolutionTime[id_] > 0) {
+      return timeOnPause[id_] + block.timestamp - pauseEvolutionTime[id_];
+    }
+    return timeOnPause[id_];
   }
 
+      /**
+    * @dev Function to pause evolution for a specific token.
+    * @param id_ The ID of the token to pause evolution for.
+    * Requirements:
+    * - The caller must be the owner of the token.
+    * - Evolution must not already be paused for the token.
+    */
   function setPauseEvolution(uint256 id_) external {
     require(ownerOf(id_) == msg.sender, "Pokemoon: caller is not the owner of the token");
 
@@ -536,10 +549,17 @@ abstract contract ERC404 is IERC404 {
 
   }
 
-    function setContinueEvolution(uint256 id_) external {
+      /**
+    * @dev Function to resume evolution for a specific token.
+    * @param id_ The ID of the token to resume evolution for.
+    * Requirements:
+    * - The caller must be the owner of the token.
+    * - Evolution must be paused for the token.
+    */
+  function setContinueEvolution(uint256 id_) external {
         require(ownerOf(id_) == msg.sender, "Pokemoon: caller is not the owner of the token");
 
-        timeOnPause[id_] += block.timestamp - getTimeSpentOnPause(id_);
+        timeOnPause[id_] = getTimeSpentOnPause(id_);
         pauseEvolutionTime[id_] = 0;
 
         emit EvolutionContinued(id_, block.timestamp);
