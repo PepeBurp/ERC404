@@ -35,14 +35,6 @@ contract Test is Ownable, ERC404 {
     string private constant evo9Path8 = "evo9/8/";
     string private constant evo9Path9 = "evo9/9/";
 
-    mapping(uint256 => uint256) private pauseEvolutionTime;
-    mapping(uint256 => uint256) private continueEvolution;
-
-    uint256 private timeOnPause;
-
-    event EvolutionPaused(uint256 id_, uint256 timestamp);
-    event EvolutionContinued(uint256 id_, uint256 timestamp);
-
     constructor(
         string memory name_,
         string memory symbol_,
@@ -192,115 +184,35 @@ contract Test is Ownable, ERC404 {
         customRatio = newRatio;
     }
 
-    /**
-    * @dev Function to pause evolution for a specific token.
-    * @param id_ The ID of the token to pause evolution for.
-    * Requirements:
-    * - The caller must be the owner of the token.
-    * - Evolution must not already be paused for the token.
-    */
-
-
-
-    function getTimeSpentOnPause(uint id_) internal view  returns (uint) {
-
-        // if we're on pause increase the total time spent on pause by the time of the current pause
-        if (pauseEvolutionTime[id_] > 0) {
-            return timeOnPause + (block.timestamp - pauseEvolutionTime[id_]);
-        }
-
-        return timeOnPause;
-    }
-
-    function setPauseEvolution(uint256 id_) external {
-        require(ownerOf(id_) == _msgSender(), "Pokemoon: caller is not the owner of the token");
-
-        if ( pauseEvolutionTime[id_] == 0) {
-            pauseEvolutionTime[id_] = block.timestamp;
-
-        emit EvolutionPaused(id_, block.timestamp);
-
-        }
-
-    }
-
-    /**
-    * @dev Function to resume evolution for a specific token.
-    * @param id_ The ID of the token to resume evolution for.
-    * Requirements:
-    * - The caller must be the owner of the token.
-    * - Evolution must be paused for the token.
-    */
-
-    function setContinueEvolution(uint256 id_) external {
-        require(ownerOf(id_) == _msgSender(), "Pokemoon: caller is not the owner of the token");
-
-        timeOnPause = getTimeSpentOnPause(id_);
-        pauseEvolutionTime[id_] = 0;
-
-        emit EvolutionContinued(id_, block.timestamp);
-    }
-
-    /**
-    * @dev Function to check if evolution is paused for a specific token.
-    * @param id_ The ID of the token to check.
-    * @return A boolean indicating whether evolution is paused for the token.
-    */
-    function isEvolutionPaused(uint256 id_) external view returns (bool) {
-        return pauseEvolutionTime[id_] > 0;
-    }
-
     function getTimeUntilNextEvolution(uint256 id_) external view returns (uint256) {
+
         uint256 lastTransferTimestamp = _getERC721LastTransferTimestamp(id_);
+        uint256 evolutionTime = block.timestamp - lastTransferTimestamp - getTimeSpentOnPause(id_);
         uint256 evolutionInterval = 7 minutes;
 
-        uint256 timeRemaining;
-
-            // Check if evolution is paused
-        if (pauseEvolutionTime[id_] > 0) {
-            // Check if evolution is paused and not resumed
-        if (continueEvolution[id_] == 0) {
+        if (getPauseEvolutionTime(id_) > 0) {
             return 11; // Special code indicating pause
         }
 
-        // Calculate time remaining after considering pause and resume
-        uint256 timeSincePause = block.timestamp - continueEvolution[id_];
-        uint256 timePaused = pauseEvolutionTime[id_] - lastTransferTimestamp;
-        timeRemaining = (evolutionInterval - (timeSincePause + timePaused) % evolutionInterval) / 1 minutes;
-
-        return timeRemaining;
-    }
-
-    // Calculate time remaining until next evolution
-    uint256 timeSinceLastTransfer = block.timestamp - lastTransferTimestamp;
-    timeRemaining = (evolutionInterval - timeSinceLastTransfer % evolutionInterval) / 1 minutes;
-
-    // Special case for evo2Path2
-            string memory evoPath2 = getEvo2Path(lastTransferTimestamp, id_);
-        if (keccak256(bytes(evoPath2)) == keccak256(bytes(evo2Path2))) {
+        if (containsSubstring(tokenURI(id_), evo1Path)) {
+            return 13; // Special code indicating Not Evo
+        }
+        if (containsSubstring(tokenURI(id_), evo2Path2)) {
+            return 12; // Special code indicating evo2Path2
+        }
+        if (containsSubstring(tokenURI(id_), evo3Path3)) {
+            return 12; // Special code indicating evo3Path3
+        }
+        if (containsSubstring(tokenURI(id_), evo4Path4)) {
             return 12; // Special code indicating evo4Path4
         }
-
-        string memory evoPath3 = getEvo3Path(lastTransferTimestamp, id_);
-        if (keccak256(bytes(evoPath3)) == keccak256(bytes(evo3Path3))) {
-            return 12; // Special code indicating evo4Path4
+        if (containsSubstring(tokenURI(id_), evo5Path5)) {
+            return 12; // Special code indicating evo5Path5
         }
-
-        string memory evoPath4 = getEvo4Path(lastTransferTimestamp, id_);
-        if (keccak256(bytes(evoPath4)) == keccak256(bytes(evo4Path4))) {
-            return 12; // Special code indicating evo4Path4
+        if (containsSubstring(tokenURI(id_), evo9Path9)) {
+            return 12; // Special code indicating evo9Path9
         }
-
-        string memory evoPath5 = getEvo4Path(lastTransferTimestamp, id_);
-        if (keccak256(bytes(evoPath5)) == keccak256(bytes(evo5Path5))) {
-            return 12; // Special code indicating evo4Path4
-        }
-
-        string memory evoPath9 = getEvo4Path(lastTransferTimestamp, id_);
-        if (keccak256(bytes(evoPath9)) == keccak256(bytes(evo9Path9))) {
-            return 12; // Special code indicating evo4Path4
-        }
-
+    uint256 timeRemaining = (evolutionInterval - (evolutionTime) % evolutionInterval) / 1 minutes;
     return timeRemaining;
     }
 }
