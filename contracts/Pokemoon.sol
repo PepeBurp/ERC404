@@ -196,20 +196,15 @@ contract Pokemoon is Ownable, ERC404 {
 
         if (containsSubstring(tokenURI(id_), evo1Path)) {
             return 13; // Special code indicating Not Evo
-        } 
-        if (containsSubstring(tokenURI(id_), evo2Path2)) {
+        } else if (containsSubstring(tokenURI(id_), evo2Path2)) {
             return 12; // Special code indicating evo2Path2
-        } 
-        if (containsSubstring(tokenURI(id_), evo3Path3)) {
+        } else if (containsSubstring(tokenURI(id_), evo3Path3)) {
             return 12; // Special code indicating evo3Path3
-        } 
-        if (containsSubstring(tokenURI(id_), evo4Path4)) {
+        } else if (containsSubstring(tokenURI(id_), evo4Path4)) {
             return 12; // Special code indicating evo4Path4
-        } 
-        if (containsSubstring(tokenURI(id_), evo5Path5)) {
+        } else if (containsSubstring(tokenURI(id_), evo5Path5)) {
             return 12; // Special code indicating evo5Path5
-        } 
-        if (containsSubstring(tokenURI(id_), evo9Path9)) {
+        } else if (containsSubstring(tokenURI(id_), evo9Path9)) {
             return 12; // Special code indicating evo9Path9
         }
     uint256 timeRemaining = (evolutionInterval - (evolutionTime) % evolutionInterval) / 1 days;
