@@ -461,7 +461,7 @@ abstract contract ERC404 is IERC404 {
   ///         to fall within the range of possible token ids, it does not
   ///         necessarily have to be minted yet.
   function _isValidTokenId(uint256 id_) internal pure returns (bool) {
-    return id_ > ID_ENCODING_PREFIX % 1e7 && id_ != type(uint256).max;
+    return id_ > ID_ENCODING_PREFIX && id_ != type(uint256).max;
   }
 
   /// @notice Internal function to compute domain separator for EIP-2612 permits
@@ -736,7 +736,7 @@ abstract contract ERC404 is IERC404 {
       revert InvalidRecipient();
     }
 
-    if (totalSupply + value_ > ID_ENCODING_PREFIX / 1e7) {
+    if (totalSupply + value_ > ID_ENCODING_PREFIX) {
       revert MintLimitReached();
     }
 
@@ -767,7 +767,7 @@ abstract contract ERC404 is IERC404 {
         revert MintLimitReached();
       }
 
-      id = (ID_ENCODING_PREFIX + minted) % 1e7;
+      id = ID_ENCODING_PREFIX + minted;
     }
 
     address erc721Owner = _getOwnerOf(id);
